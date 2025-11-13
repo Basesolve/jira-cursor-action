@@ -48,7 +48,6 @@ pip install jira-cursor
 export JIRA_DOMAIN="your-company"
 export JIRA_EMAIL="your-email@example.com"
 export JIRA_TOKEN="your-jira-api-token"
-export JIRA_PROJECT_KEY="TS"
 export GITHUB_REPO_OWNER="your-org"
 export GITHUB_REPO_NAME="your-repo"
 export CURSOR_CLOUD_API_KEY="your-cursor-cloud-api-key"  # Required
@@ -88,7 +87,6 @@ jira-cursor \
   --jira-domain "your-company" \
   --jira-email "your-email@example.com" \
   --jira-token "your-jira-api-token" \
-  --jira-project-key "TS" \
   --github-repo-owner "your-org" \
   --github-repo-name "your-repo" \
   --cursor-cloud-api-key "your-cursor-api-key" \
@@ -102,14 +100,12 @@ jira-cursor \
 | `--jira-domain`                 | `JIRA_DOMAIN`                 | Jira domain (e.g., 'mycompany')             | Required                           |
 | `--jira-email`                  | `JIRA_EMAIL`                  | Jira user email                             | Required                           |
 | `--jira-token`                  | `JIRA_TOKEN`                  | Jira API token                              | Required                           |
-| `--jira-project-key`            | `JIRA_PROJECT_KEY`            | Jira project key (e.g., 'TS')               | Required                           |
 | `--github-repo-owner`           | `GITHUB_REPO_OWNER`           | GitHub repository owner                     | Required                           |
 | `--github-repo-name`            | `GITHUB_REPO_NAME`            | GitHub repository name                      | Required                           |
 | `--cursor-cloud-api-key`        | `CURSOR_CLOUD_API_KEY`        | Cursor Cloud API key (required)             | Required                           |
 | `--jql-query`                   | `JQL_QUERY`                   | JQL query to select tickets for processing  | Required                           |
 | `--cursor-cloud-base-url`       | `CURSOR_CLOUD_BASE_URL`       | Cursor Cloud API base URL                   | `https://api.cursor.com`           |
 | `--cursor-cloud-repository-ref` | `CURSOR_CLOUD_REPOSITORY_REF` | Repository ref/branch                       | `main`                             |
-| `--draft-pr-status`             | `DRAFT_PR_STATUS`             | Status name for tickets ready for PR        | `Draft PR Creation`                |
 | `--need-info-status`            | `NEED_INFO_STATUS`            | Status name for tickets needing info        | `Need More Information`            |
 | `--pr-created-status`           | `PR_CREATED_STATUS`           | Status after PR creation                    | `Draft PR created. Pending review` |
 | `--log-dir`                     | `LOG_DIR`                     | Directory for log files                     | `./logs`                           |
@@ -152,7 +148,6 @@ service = create_automation_service(
     jira_token="your-jira-token",
     github_repo_owner="your-org",
     github_repo_name="your-repo",
-    jira_project_key="TS",
     code_generator=code_generator,
 )
 
@@ -215,7 +210,6 @@ All configuration can be provided via environment variables:
 export JIRA_DOMAIN="your-company"
 export JIRA_EMAIL="your-email@example.com"
 export JIRA_TOKEN="your-jira-api-token"
-export JIRA_PROJECT_KEY="TS"
 
 # GitHub Configuration
 export GITHUB_REPO_OWNER="your-org"
@@ -233,7 +227,6 @@ export CODEBASE_PATH="/path/to/codebase"  # Optional, for local file resolution
 export JQL_QUERY='project = TS AND status = "Draft PR Creation"'
 
 # Status Configuration (Optional)
-export DRAFT_PR_STATUS="Draft PR Creation"
 export NEED_INFO_STATUS="Need More Information"
 export PR_CREATED_STATUS="Draft PR created. Pending review"
 
@@ -254,7 +247,6 @@ config = AutomationConfig(
     jira_domain="your-company",
     jira_email="your-email@example.com",
     jira_token="your-jira-token",
-    jira_project_key="TS",
     github_repo_owner="your-org",
     github_repo_name="your-repo",
 )
@@ -295,7 +287,6 @@ jobs:
           JIRA_DOMAIN: ${{ secrets.JIRA_DOMAIN }}
           JIRA_EMAIL: ${{ secrets.JIRA_EMAIL }}
           JIRA_TOKEN: ${{ secrets.JIRA_TOKEN }}
-          JIRA_PROJECT_KEY: ${{ secrets.JIRA_PROJECT_KEY }}
           GITHUB_REPO_OWNER: ${{ secrets.GITHUB_REPO_OWNER }}
           GITHUB_REPO_NAME: ${{ secrets.GITHUB_REPO_NAME }}
           CURSOR_CLOUD_API_KEY: ${{ secrets.CURSOR_CLOUD_API_KEY }}

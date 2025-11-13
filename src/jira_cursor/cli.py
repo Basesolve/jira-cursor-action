@@ -42,12 +42,6 @@ def main() -> int:
         default=os.getenv("JIRA_TOKEN", ""),
     )
     parser.add_argument(
-        "--jira-project-key",
-        type=str,
-        help="Jira project key (e.g., 'TS')",
-        default=os.getenv("JIRA_PROJECT_KEY", ""),
-    )
-    parser.add_argument(
         "--github-repo-owner",
         type=str,
         help="GitHub repository owner",
@@ -58,12 +52,6 @@ def main() -> int:
         type=str,
         help="GitHub repository name",
         default=os.getenv("GITHUB_REPO_NAME", ""),
-    )
-    parser.add_argument(
-        "--draft-pr-status",
-        type=str,
-        default="Draft PR Creation",
-        help="Status name for tickets ready for PR creation",
     )
     parser.add_argument(
         "--need-info-status",
@@ -131,7 +119,6 @@ def main() -> int:
         ("jira_domain", args.jira_domain),
         ("jira_email", args.jira_email),
         ("jira_token", args.jira_token),
-        ("jira_project_key", args.jira_project_key),
         ("github_repo_owner", args.github_repo_owner),
         ("github_repo_name", args.github_repo_name),
         ("jql_query", args.jql_query),
@@ -196,8 +183,6 @@ def main() -> int:
             jira_token=args.jira_token,
             github_repo_owner=args.github_repo_owner,
             github_repo_name=args.github_repo_name,
-            jira_project_key=args.jira_project_key,
-            draft_pr_status=args.draft_pr_status,
             need_info_status=args.need_info_status,
             pr_created_status=args.pr_created_status,
             code_generator=code_generator,

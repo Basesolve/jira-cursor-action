@@ -27,8 +27,6 @@ class AutomationService:  # pylint: disable=too-many-instance-attributes
         self,
         jira_client: JiraClient,
         ticket_assessor: TicketAssessor,
-        project_key: str,
-        draft_pr_status: str = "Draft PR Creation",
         need_info_status: str = "Need More Information",
         pr_created_status: str = "Draft PR created. Pending review",
         code_generator: Optional[CodeGenerator] = None,
@@ -39,10 +37,6 @@ class AutomationService:  # pylint: disable=too-many-instance-attributes
         :type jira_client: JiraClient
         :param ticket_assessor: Ticket assessor instance
         :type ticket_assessor: TicketAssessor
-        :param project_key: Jira project key (e.g., 'TS')
-        :type project_key: str
-        :param draft_pr_status: Status name for tickets ready for ./PR creation
-        :type draft_pr_status: str
         :param need_info_status: Status name for tickets needing more info
         :type need_info_status: str
         :param pr_created_status: Status name for tickets after PR is created
@@ -54,8 +48,6 @@ class AutomationService:  # pylint: disable=too-many-instance-attributes
         self.jira_client = jira_client
         self.ticket_assessor = ticket_assessor
         self.code_generator = code_generator
-        self.project_key = project_key
-        self.draft_pr_status = draft_pr_status
         self.need_info_status = need_info_status
         self.pr_created_status = pr_created_status
         self.processed_tickets: set[str] = set()
@@ -88,7 +80,7 @@ class AutomationService:  # pylint: disable=too-many-instance-attributes
                     f"ticket does not have enough information to create a "
                     f"draft PR. Missing: {', '.join(missing_fields)}. "
                     f"Please provide the missing information and update the "
-                    f'ticket status back to "{self.draft_pr_status}".'
+                    f"ticket status accordingly."
                 )
                 self.jira_client.add_comment(ticket_key, comment)
                 success = self.jira_client.update_ticket_status(ticket_key, self.need_info_status)
@@ -218,7 +210,7 @@ class AutomationService:  # pylint: disable=too-many-instance-attributes
         :return: Number of tickets processed
         :rtype: int
         """
-        logger.info("Starting automation run for project %s", self.project_key)
+        logger.info("Starting automation run")
         try:
             logger.info("Using JQL query to select tickets")
             logger.debug("JQL query: %s", jql)
@@ -311,8 +303,6 @@ def create_automation_service(  # pylint: disable=too-many-arguments,too-many-po
     jira_token: str,
     github_repo_owner: str,
     github_repo_name: str,
-    jira_project_key: str,
-    draft_pr_status: str = "Draft PR Creation",
     need_info_status: str = "Need More Information",
     pr_created_status: str = "Draft PR created. Pending review",
     code_generator: Optional[CodeGenerator] = None,
@@ -329,10 +319,6 @@ def create_automation_service(  # pylint: disable=too-many-arguments,too-many-po
     :type github_repo_owner: str
     :param github_repo_name: GitHub repository name
     :type github_repo_name: str
-    :param jira_project_key: Jira project key
-    :type jira_project_key: str
-    :param draft_pr_status: Status name for tickets ready for PR creation
-    :type draft_pr_status: str
     :param need_info_status: Status name for tickets needing more information
     :type need_info_status: str
     :param code_generator: Code generator instance (required)
@@ -376,8 +362,6 @@ def create_automation_service(  # pylint: disable=too-many-arguments,too-many-po
     service = AutomationService(
         jira_client=jira_client,
         ticket_assessor=ticket_assessor,
-        project_key=jira_project_key,
-        draft_pr_status=draft_pr_status,
         need_info_status=need_info_status,
         pr_created_status=pr_created_status,
         code_generator=code_generator,

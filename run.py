@@ -1,4 +1,6 @@
 """Run the automation service."""
+
+import logging
 import os
 
 try:
@@ -8,9 +10,10 @@ try:
 except ImportError:
     pass
 
-from src.jira_cursor.automation_service import (
-    create_automation_service,
-)
+from src.jira_cursor.automation_service import create_automation_service, setup_logging
+
+# Configure logger
+logger = logging.getLogger(__name__)
 
 JIRA_DOMAIN = os.environ.get("JIRA_DOMAIN", "org")
 JIRA_EMAIL = os.environ.get("JIRA_EMAIL", "dev@org.com")
@@ -18,20 +21,12 @@ JIRA_TOKEN = os.environ.get("JIRA_TOKEN", "1234567890")
 GITHUB_TOKEN = os.environ.get("GITHUB_TOKEN", "1234567890")
 GITHUB_REPO_OWNER = os.environ.get("GITHUB_REPO_OWNER", "org")
 GITHUB_REPO_NAME = os.environ.get("GITHUB_REPO_NAME", "repo")
-JIRA_PROJECT_KEY = os.environ.get("JIRA_PROJECT_KEY", "TS")
-DRAFT_PR_STATUS = os.environ.get("DRAFT_PR_STATUS", "Draft PR Creation")
 NEED_INFO_STATUS = os.environ.get("NEED_INFO_STATUS", "Need More Information")
-PR_CREATED_STATUS = os.environ.get(
-    "PR_CREATED_STATUS", "Draft PR created. Pending review"
-)
+PR_CREATED_STATUS = os.environ.get("PR_CREATED_STATUS", "Draft PR created. Pending review")
 
-CURSOR_CLOUD_BASE_URL = os.environ.get(
-    "CURSOR_CLOUD_BASE_URL", "https://api.cursor.com"
-)
+CURSOR_CLOUD_BASE_URL = os.environ.get("CURSOR_CLOUD_BASE_URL", "https://api.cursor.com")
 CURSOR_CLOUD_API_KEY = os.environ.get("CURSOR_CLOUD_API_KEY", "1234567890")
-CURSOR_CLOUD_REPOSITORY_REF = os.environ.get(
-    "CURSOR_CLOUD_REPOSITORY_REF", "main"
-)
+CURSOR_CLOUD_REPOSITORY_REF = os.environ.get("CURSOR_CLOUD_REPOSITORY_REF", "main")
 CODEBASE_PATH = os.environ.get("CODEBASE_PATH", "")
 JQL_QUERY = os.environ.get("JQL_QUERY", "")
 
@@ -50,6 +45,14 @@ if __name__ == "__main__":
         print("Please set JQL_QUERY to a valid JQL query string")
         exit(1)
 
+    # Set up logging
+    log_level_str = os.environ.get("LOG_LEVEL", "INFO")
+    log_level = getattr(logging, log_level_str.upper(), logging.INFO)
+    setup_logging(log_level=log_level)
+
+    # Log JQL query
+    logger.info("JQL Query: %s", JQL_QUERY)
+
     # Option 1: Let create_automation_service auto-create CodeGenerator
     # (it will use the environment variables we just set)
     service = create_automation_service(
@@ -58,8 +61,6 @@ if __name__ == "__main__":
         jira_token=JIRA_TOKEN,
         github_repo_owner=GITHUB_REPO_OWNER,
         github_repo_name=GITHUB_REPO_NAME,
-        jira_project_key=JIRA_PROJECT_KEY,
-        draft_pr_status=DRAFT_PR_STATUS,
         need_info_status=NEED_INFO_STATUS,
         pr_created_status=PR_CREATED_STATUS,
     )

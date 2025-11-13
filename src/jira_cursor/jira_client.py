@@ -236,8 +236,7 @@ class JiraClient:
         }
 
         try:
-            logger.info("Querying Jira with custom JQL query")
-            logger.debug("JQL query: %s", jql)
+            logger.info("Querying Jira with custom JQL query: %s", jql)
             response = requests.get(
                 url,
                 headers=self.headers,

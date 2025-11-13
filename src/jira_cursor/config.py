@@ -29,16 +29,8 @@ class AutomationConfig(BaseModel):
     jira_domain: str = Field(..., description="Jira domain (e.g., 'mycompany')")
     jira_email: str = Field(..., description="Jira user email")
     jira_token: str = Field(..., description="Jira API token")
-    jira_project_key: str = Field(
-        ...,
-        description="Jira project key (e.g., 'TS')",  # noqa: E501
-    )
     github_repo_owner: str = Field(..., description="GitHub repository owner")
     github_repo_name: str = Field(..., description="GitHub repository name")
-    draft_pr_status: str = Field(
-        default="Draft PR Creation",
-        description="Status name for tickets ready for PR creation",
-    )
     need_info_status: str = Field(
         default="Need More Information",
         description="Status name for tickets needing more information",
@@ -67,10 +59,8 @@ class AutomationConfig(BaseModel):
             jira_domain=os.getenv("JIRA_DOMAIN", ""),
             jira_email=os.getenv("JIRA_EMAIL", ""),
             jira_token=os.getenv("JIRA_TOKEN", ""),
-            jira_project_key=os.getenv("JIRA_PROJECT_KEY", ""),
             github_repo_owner=os.getenv("GITHUB_REPO_OWNER", ""),
             github_repo_name=os.getenv("GITHUB_REPO_NAME", ""),
-            draft_pr_status=os.getenv("DRAFT_PR_STATUS", "Draft PR Creation"),
             need_info_status=os.getenv("NEED_INFO_STATUS", "Need More Information"),
             pr_created_status=os.getenv("PR_CREATED_STATUS", "Draft PR created. Pending review"),
             log_dir=os.getenv("LOG_DIR", None),
