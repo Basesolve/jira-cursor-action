@@ -4,7 +4,7 @@ This package enables automated PR creation from Jira tickets
 using Cursor Cloud Agents.
 """
 
-__version__ = "0.1.0"
+__version__ = "0.1.1"
 
 from .automation_service import (
     AutomationService,
