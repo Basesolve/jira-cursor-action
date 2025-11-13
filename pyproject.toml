@@ -1,0 +1,93 @@
+[project]
+name = "jira-cursor"
+version = "0.1.0"
+description = "Enable Jira tickets to Cursor Cloud Agent draft PR automations."
+readme = "README.md"
+authors = [
+    { name = "Rohith Bilgi Sampgod", email = "77735942+rohith-bs@users.noreply.github.com" }
+]
+requires-python = ">=3.9"
+dependencies = [
+    "requests>=2.31.0",
+    "pydantic>=2.0.0",
+    "python-dotenv>=1.0.0",
+]
+license = { text = "MIT" }
+keywords = [
+    "jira",
+    "cursor",
+    "automation",
+    "pr",
+    "pull-request",
+    "cursor-cloud",
+    "jira-integration",
+    "ci-cd",
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Topic :: Software Development :: Version Control :: Git",
+    "Topic :: Office/Business",
+]
+
+[project.scripts]
+jira-cursor = "jira_cursor.cli:main"
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0.0",
+    "pytest-cov>=4.0.0",
+    "types-requests>=2.31.0",
+    "mypy>=1.0.0",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+addopts = [
+    "-v",
+    "--strict-markers",
+]
+
+[tool.black]
+line-length = 100
+target-version = ["py39", "py310", "py311", "py312"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py39"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "N", "UP"]
+# E501 (line too long) will use the line-length from [tool.ruff] (100)
+# No need to ignore E501 - it will respect the configured line-length
+
+[tool.pylint.format]
+max-line-length = 100
+
+[tool.mypy]
+python_version = "3.9"
+warn_unused_configs = true
+# Allow returning Any from functions that return dict/list with Any values
+# This is common when working with JSON APIs (e.g., requests.json() returns Any)
+warn_return_any = false
+# Disable no-any-return errors (similar to warn_return_any but for error codes)
+disable_error_code = ["no-any-return"]
+# Show error codes in output
+show_error_codes = true
+# Follow imports for type checking
+follow_imports = "normal"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"

@@ -1,0 +1,169 @@
+{
+  // Python Language Server Configuration
+  "python.languageServer": "Pylance",
+  "python.analysis.typeCheckingMode": "basic",
+  "python.analysis.autoImportCompletions": true,
+  "python.analysis.diagnosticMode": "workspace",
+  "python.analysis.inlayHints.variableTypes": true,
+  "python.analysis.inlayHints.functionReturnTypes": true,
+
+  // Python Formatting - Using Ruff (as per coding rules)
+  "python.formatting.provider": "none",
+  "[python]": {
+    "editor.defaultFormatter": "charliermarsh.ruff",
+    "editor.formatOnSave": true,
+    "editor.codeActionsOnSave": {
+      "source.fixAll": "explicit",
+      "source.organizeImports": "explicit"
+    },
+    "editor.rulers": [100],
+    "editor.tabSize": 4,
+    "editor.insertSpaces": true,
+    "editor.detectIndentation": false,
+    "editor.trimAutoWhitespace": true,
+    "files.trimTrailingWhitespace": true,
+    "files.insertFinalNewline": true,
+    "files.trimFinalNewlines": true
+  },
+
+  // Ruff Native Server Configuration (migrated from ruff-lsp)
+  // Using native server (ruff server) - ruff-lsp is deprecated
+  // See: https://docs.astral.sh/ruff/editors/migration/
+  "ruff.enable": true,
+  "ruff.lint.enable": true,
+
+  // Line length setting (applies to both linter and formatter)
+  "ruff.lineLength": 100,
+
+  // Linter rule selection (replaces --select in lint.args)
+  // Aligned with pyproject.toml - matches [tool.ruff.lint] select
+  // Valid selectors: https://docs.astral.sh/ruff/linter/
+  "ruff.lint.select": [
+    "E", // pycodestyle errors
+    "F", // pyflakes
+    "W", // pycodestyle warnings
+    "I", // isort
+    "N", // pep8-naming
+    "UP" // pyupgrade
+  ],
+  // Note: To add more rules, use valid selectors like:
+  // "B" (flake8-bugbear), "C4" (flake8-comprehensions), "RUF" (ruff-specific),
+  // "PLC" (Pylint convention), "PLE" (Pylint error), "PLW" (Pylint warning), etc.
+
+  // Ignore specific rules (replaces --ignore in lint.args)
+  // Note: E501 (line too long) respects ruff.lineLength setting (100)
+  // Only ignore if you want to disable the check entirely
+  "ruff.lint.ignore": [],
+
+  // Code actions
+  "ruff.codeAction.fixViolation": {
+    "enable": true
+  },
+  "ruff.codeAction.disableRuleComment": {
+    "enable": true
+  },
+
+  // Preview features (optional - set to false for stable behavior)
+  "ruff.lint.preview": false,
+  "ruff.format.preview": false,
+
+  // MyPy Type Checking (as per coding rules)
+  "mypy-type-checker.enable": true,
+  "mypy-type-checker.args": [
+    "--python-version=3.8",
+    "--warn-return-any",
+    "--warn-unused-configs",
+    "--show-error-codes",
+    "--no-error-summary"
+  ],
+  "mypy-type-checker.reportingScope": "workspace",
+
+  // Bandit Security Scanner (as per coding rules)
+  "bandit.enabled": true,
+  "bandit.args": ["-r", ".", "-f", "json"],
+
+  // Editor Settings (aligns with coding rules)
+  "editor.rulers": [100],
+  "editor.tabSize": 4,
+  "editor.insertSpaces": true,
+  "editor.detectIndentation": false,
+  "editor.trimAutoWhitespace": true,
+  "files.trimTrailingWhitespace": true,
+  "files.insertFinalNewline": true,
+  "files.trimFinalNewlines": true,
+  "files.eol": "\n",
+
+  // Python-specific Editor Settings
+  "python.analysis.completeFunctionParens": true,
+  "python.analysis.stubPath": "./typings",
+  "python.analysis.diagnosticSeverityOverrides": {
+    "reportMissingTypeStubs": "none",
+    "reportUnusedImport": "warning",
+    "reportUnusedClass": "warning",
+    "reportUnusedFunction": "warning",
+    "reportUnusedVariable": "warning",
+    "reportGeneralTypeIssues": "warning"
+  },
+
+  // File Associations
+  "files.associations": {
+    "*.mdc": "markdown"
+  },
+
+  // Exclude patterns
+  "files.exclude": {
+    "**/__pycache__": true,
+    "**/*.pyc": true,
+    "**/.pytest_cache": true,
+    "**/.mypy_cache": true,
+    "**/.ruff_cache": true
+  },
+
+  // Search Exclude
+  "search.exclude": {
+    "**/__pycache__": true,
+    "**/*.pyc": true,
+    "**/.pytest_cache": true,
+    "**/.mypy_cache": true,
+    "**/.ruff_cache": true,
+    "**/node_modules": true
+  },
+
+  // Cursor-specific settings (if using Cursor IDE)
+  // These ensure coding rules are referenced
+  "cursor.cpp.disabledLanguages": [],
+
+  // Git Settings (aligns with coding rules for commit messages)
+  "git.enableSmartCommit": true,
+  "git.confirmSync": false,
+
+  // Terminal Settings
+  "terminal.integrated.defaultProfile.linux": "bash",
+
+  // Additional Python Settings
+  "python.testing.pytestEnabled": true,
+  "python.testing.unittestEnabled": false,
+  "python.testing.pytestArgs": ["tests"],
+  "python.testing.autoTestDiscoverOnSaveEnabled": true,
+
+  // Linting (Ruff handles this, but keeping for compatibility)
+  "python.linting.enabled": true,
+  "python.linting.ruffEnabled": true,
+  "python.linting.pylintEnabled": false,
+  "python.linting.flake8Enabled": false,
+  "python.linting.mypyEnabled": false, // Using mypy-type-checker extension instead
+
+  // Code Actions
+  "editor.codeActionsOnSave": {
+    "source.fixAll": "explicit",
+    "source.organizeImports": "explicit"
+  },
+
+  // File Watcher Exclusions
+  "files.watcherExclude": {
+    "**/__pycache__/**": true,
+    "**/.pytest_cache/**": true,
+    "**/.mypy_cache/**": true,
+    "**/.ruff_cache/**": true
+  }
+}

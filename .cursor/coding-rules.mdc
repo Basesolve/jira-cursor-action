@@ -1,0 +1,558 @@
+---
+globs: *.py
+alwaysApply: false
+---
+# Cursor Rules for augmet-engine
+
+## Security Best Practices
+
+### Shell Command Execution
+- **NEVER** use `os.popen()`, `os.system()`, or `subprocess.run(..., shell=True)` with user input
+- **ALWAYS** use `subprocess.run()` with argument lists for simple commands
+- **ALWAYS** use `subprocess.Popen()` with proper pipe chaining for complex pipelines
+- **ALWAYS** validate and sanitize file paths before using them in commands
+- **ALWAYS** use `shlex.quote()` if you must construct shell commands (avoid if possible)
+
+### Input Validation
+- **ALWAYS** validate user input before using in subprocess calls
+- **ALWAYS** validate file paths exist and are within allowed directories
+- **ALWAYS** use parameterized queries for database operations
+- **NEVER** trust user input without validation
+
+### Error Handling
+- **ALWAYS** catch specific exceptions (`subprocess.CalledProcessError`, `OSError`, etc.)
+- **ALWAYS** log errors appropriately
+- **NEVER** use bare `except Exception:` - be specific
+- **ALWAYS** handle subprocess errors gracefully
+
+## Code Quality Standards
+
+### File Size
+- **AVOID** files larger than 2000 lines - split into smaller modules
+- **REFACTOR** large files (like `dna.py` with 11,258 lines) into smaller, focused modules
+
+### Exception Handling
+- **AVOID** broad exception handlers (`except Exception:`)
+- **USE** specific exception types
+- **ALWAYS** log exceptions with context
+- **CONSIDER** re-raising exceptions after logging
+
+### Type Hints
+- **USE** type hints for function parameters and return values
+- **AVOID** excessive `# type: ignore` comments - fix the underlying issues
+- **ENABLE** MyPy in CI/CD for type checking
+
+### Testing
+- **WRITE** unit tests for new functions
+- **MAINTAIN** test coverage above 70%
+- **TEST** security-critical code paths thoroughly
+- **INCLUDE** integration tests for complex workflows
+
+## Database Operations
+
+### Connection Management
+- **ALWAYS** use connection pooling
+- **ALWAYS** close connections in `finally` blocks
+- **ALWAYS** use context managers (`with` statements) when possible
+- **NEVER** leave connections open
+
+### SQL Injection Prevention
+- **ALWAYS** use parameterized queries (SQLAlchemy ORM or parameterized statements)
+- **NEVER** construct SQL queries with string formatting or f-strings
+- **ALWAYS** validate input before database operations
+
+## Configuration Management
+
+### Secrets and Credentials
+- **NEVER** hardcode passwords, API keys, or tokens in code
+- **ALWAYS** use environment variables or secure configuration files
+- **ALWAYS** exclude example configs with real credentials from version control
+- **USE** `.gitignore` to prevent committing sensitive files
+
+### Configuration Files
+- **VALIDATE** configuration files with Pydantic models
+- **PROVIDE** example configs without real credentials
+- **DOCUMENT** required configuration parameters
+
+## Logging and Monitoring
+
+### Logging Standards
+- **USE** appropriate log levels (DEBUG, INFO, WARNING, ERROR, CRITICAL)
+- **INCLUDE** context in log messages (sample IDs, workflow IDs, etc.)
+- **AVOID** logging sensitive information (passwords, tokens, etc.)
+- **ROTATE** log files based on size limits
+
+### Error Reporting
+- **LOG** all errors with sufficient context for debugging
+- **INCLUDE** stack traces for unexpected errors
+- **REPORT** critical errors to monitoring systems (Slack, Jira, etc.)
+
+## Code Organization
+
+### Module Structure
+- **KEEP** related functionality together
+- **SEPARATE** concerns (business logic, I/O, configuration)
+- **AVOID** circular imports
+- **USE** clear module and function names
+
+### Documentation
+- **DOCUMENT** all public functions and classes
+- **INCLUDE** parameter descriptions and return value documentation
+- **EXPLAIN** complex logic with comments
+- **MAINTAIN** README files with setup instructions
+
+## Performance
+
+### Resource Management
+- **CLOSE** file handles and connections promptly
+- **USE** generators for large datasets
+- **AVOID** loading entire files into memory when streaming is possible
+- **MONITOR** memory usage for large operations
+
+### Optimization
+- **PROFILE** code before optimizing
+- **OPTIMIZE** bottlenecks, not premature optimization
+- **USE** appropriate data structures
+- **CONSIDER** caching for expensive operations
+
+## Git and Version Control
+
+### Commit Messages
+- **USE** conventional commit format: `type: description`
+- **INCLUDE** ticket IDs when applicable (e.g., `TS-123: Fix shell injection`)
+- **EXPLAIN** what and why, not just what
+- **REFERENCE** related issues or PRs
+
+### Branch Naming
+- **USE** descriptive branch names: `feature/TS-123-description` or `fix/TS-123-description`
+- **INCLUDE** ticket IDs when applicable
+- **AVOID** generic names like `update` or `fix`
+
+## Dependencies
+
+### Dependency Management
+- **KEEP** dependencies up to date
+- **REVIEW** security advisories for dependencies
+- **AVOID** duplicate dependencies in requirements.txt
+- **PIN** versions for reproducibility
+- **DOCUMENT** why specific versions are required
+
+### Security Updates
+- **UPDATE** dependencies with known vulnerabilities
+- **TEST** thoroughly after dependency updates
+- **MONITOR** for security advisories
+
+## Jira Integration
+
+### Ticket References
+- **INCLUDE** Jira ticket IDs in commit messages
+- **REFERENCE** tickets in PR descriptions
+- **UPDATE** ticket status when work is complete
+- **USE** branch names that include ticket IDs
+
+### Code Review
+- **REVIEW** code against ticket requirements
+- **VERIFY** acceptance criteria are met
+- **CHECK** that implementation matches ticket description
+
+## Pre-commit Hooks
+
+### Code Quality
+- **ENABLE** pre-commit hooks for code quality
+- **RUN** Ruff linter and formatter
+- **RUN** Bandit security scanner
+- **FIX** issues before committing
+
+### Security Checks
+- **SCAN** for secrets before committing
+- **CHECK** for security vulnerabilities
+- **VERIFY** no hardcoded credentials
+
+## DeepSource Python Analyzer Compliance
+
+### Security Issues (BAN-*)
+
+#### Insecure Operations
+- **NEVER** use `subprocess.Popen()` with `shell=True` and user input (BAN-B601)
+- **ALWAYS** validate executable paths before subprocess calls (BAN-B607)
+- **NEVER** use `tempnam()` - use `tempfile.mkstemp()` or `tempfile.NamedTemporaryFile()` (BAN-B325)
+- **NEVER** use `mktemp()` - use secure tempfile alternatives (BAN-B306)
+- **ALWAYS** validate file paths to prevent directory traversal (BAN-B103)
+- **NEVER** use insecure hash functions (MD5, SHA1) for security purposes (BAN-W1003)
+- **ALWAYS** use secure cipher algorithms (BAN-W1004)
+- **NEVER** use `xmlrpclib` - use `xmlrpc.client` instead (BAN-B411)
+- **NEVER** use insecure `xml.etree.ElementTree` methods (BAN-B314)
+- **ALWAYS** validate SSL certificates for HTTP requests (BAN-B501)
+- **ALWAYS** specify SSL version explicitly (BAN-B504)
+- **NEVER** use SSL with bad defaults (BAN-B503)
+- **ALWAYS** validate host keys in SSH connections (BAN-B507)
+- **NEVER** allow shell injection via Paramiko calls (BAN-B601)
+- **ALWAYS** use parameterized queries to prevent SQL injection (BAN-B608, BAN-B610)
+- **NEVER** use `execfile()` built-in (BAN-B302)
+- **ALWAYS** set secure file permissions (BAN-B103)
+- **NEVER** perform I/O operations on closed files (BAN-B325)
+
+#### Insecure Imports and Methods
+- **NEVER** import from `xml.etree.ElementTree` without validation (BAN-B405)
+- **NEVER** use insecure `expatreader` methods (BAN-B315)
+- **NEVER** import telnet-related modules (BAN-B401)
+- **NEVER** use `_create_unverified_context` (BAN-B323)
+- **ALWAYS** validate input in `subprocess.Popen()` to prevent wildcard injection (BAN-B609)
+
+### Code Quality Issues (PYL-*)
+
+#### Function and Method Issues
+- **NEVER** define methods without `self` as first argument (PYL-E0213)
+- **NEVER** use `return` in `__init__` methods (PYL-E0101)
+- **NEVER** use `yield` outside of functions (PYL-E0105)
+- **NEVER** use `return` outside of functions (PYL-E0104)
+- **NEVER** use `continue` outside of loops (FLK-F702)
+- **NEVER** use `break` outside of loops (FLK-F701)
+- **ALWAYS** provide all required arguments in function calls (PYL-E1120, PYL-E1121)
+- **NEVER** pass too many positional arguments (PYL-E1121)
+- **NEVER** pass unexpected keyword arguments (PYL-E1123)
+- **NEVER** pass arguments both by position and keyword (PYL-E1124)
+- **NEVER** use dangerous default arguments (mutable defaults) (PYL-W0102)
+- **NEVER** define duplicate arguments in function definitions (FLK-F831)
+- **NEVER** assign result of function with no return (PYL-E1111)
+- **ALWAYS** provide mandatory keyword arguments (PYL-E1125)
+
+#### Class and Object Issues
+- **NEVER** instantiate abstract classes (PYL-E0110)
+- **NEVER** have duplicate base classes (PYL-E0241)
+- **NEVER** have inconsistent method resolution order (PYL-E0240)
+- **NEVER** assign to attributes not in `__slots__` (PY-W0076)
+- **NEVER** have class variables conflict with slots (PYL-E0242)
+- **NEVER** use invalid `slots` object (PYL-E0236, PYL-E0238)
+- **NEVER** inherit from non-class (PYL-E0239)
+- **NEVER** use bad `classmethod` arguments (PYL-C0201)
+- **NEVER** use bad `metaclass-method` arguments (PYL-C0202)
+- **ALWAYS** use iterable for slots, not simple string (PYL-C0205)
+
+#### Exception Handling
+- **NEVER** use bare `except:` - always specify exception type (FLK-E722)
+- **NEVER** catch exceptions that don't inherit from `Exception` (PYL-E0712)
+- **NEVER** catch previously caught exceptions (PYL-W0705)
+- **NEVER** raise exceptions immediately in except handler (PYL-W0706)
+- **NEVER** set exception context to non-exception (PYL-E0703)
+- **NEVER** raise objects of unsupported type (PYL-E0702)
+- **NEVER** use `raise` outside of except clause (PYL-E0704)
+- **NEVER** have bad `except` order (PYL-E0701)
+- **NEVER** catch exception that is result of binary operation (PYL-W0711)
+- **ALWAYS** handle exceptions properly (PYL-W0150)
+
+#### Variable and Name Issues
+- **NEVER** use undefined names (PYL-E0602, PYL-E0603)
+- **NEVER** use variables before assignment (PYL-E0601)
+- **NEVER** use `global` variable that is undefined (PYL-W0601)
+- **NEVER** use name prior to global declaration (PYL-E0118)
+- **NEVER** have name defined as both `nonlocal` and `global` (PYL-E0115)
+- **NEVER** use `global` at module level (PYL-W0604)
+- **NEVER** shadow loop variables with imports (FLK-F402)
+- **NEVER** use variables named 'l', 'O', or 'I' (FLK-E741)
+- **NEVER** redefine built-in functions (PYL-W0622)
+
+#### Type and Return Issues
+- **NEVER** return invalid type from `__len__` (PYL-E0303)
+- **NEVER** return non-iterator from `__iter__` (PYL-E0301)
+- **NEVER** have invalid object in `__all__` (PYL-E0604)
+- **NEVER** unpack non-sequence objects (PYL-E0633)
+- **NEVER** use two or more starred expressions in assignment (FLK-F622)
+- **ALWAYS** provide proper type hints (TYP-068, TYP-012, TYP-051)
+- **NEVER** use invalid type for tuple index (TYP-054)
+- **NEVER** use unsupported type application (TYP-019)
+- **NEVER** use invalid type alias (TYP-048)
+
+#### Control Flow Issues
+- **NEVER** have unreachable statements (PYL-W0101)
+- **NEVER** use `assert` on tuple (PYL-W0199)
+- **NEVER** have conditional with constant value (PYL-W0125)
+- **NEVER** use comparison with callable (PYL-W0143)
+- **NEVER** have useless else clause after return (PYL-R1705)
+- **NEVER** have useless else clause on loop (PYL-W0120)
+- **NEVER** use `StopIteration` in generator (PYL-R1708)
+- **NEVER** use `return` with arguments in generator (FLK-F705)
+- **NEVER** have inconsistent return statements (PYL-R1710)
+
+#### Format String Issues
+- **NEVER** have logging format string with too many arguments (PYL-E1205)
+- **NEVER** have logging format string with too few arguments (PYL-E1206)
+- **NEVER** use invalid format character (PYL-E1300)
+- **NEVER** have not enough arguments in format string (PYL-E1306)
+- **NEVER** have format string with excess arguments (PYL-E1305)
+- **NEVER** have undefined format string key (PYL-E1304)
+- **NEVER** have invalid format index (PYL-W1307)
+- **NEVER** have format needs mapping (PYL-E1303)
+- **NEVER** have mixed format string (PYL-E1302)
+- **NEVER** have combined specification for format string (PYL-W1305)
+- **NEVER** have duplicate string formatting argument (PYL-W1308)
+- **ALWAYS** use lazy formatting for logging (PYL-W1201, PYL-W1202, PYL-W1203)
+
+#### Import and Module Issues
+- **NEVER** have module level import not at top (FLK-E402)
+- **NEVER** have multiple imports on one line (FLK-E401)
+- **NEVER** have imports from same package not grouped (PYL-C0412)
+- **NEVER** have multiple imports for same import name (PYL-W0404)
+- **NEVER** have import alias same as original package name (PYL-C0414)
+- **NEVER** have cyclic imports (PYL-R0401)
+- **NEVER** import undefined `__future__` feature (FLK-F407)
+
+#### Dictionary and Collection Issues
+- **NEVER** have duplicate dictionary keys (PYL-W0109)
+- **NEVER** have unhashable dictionary keys (PYL-E1140)
+- **NEVER** change set size during iteration (PTC-W0055)
+- **NEVER** use non-iterable value in iterating context (PYL-E1133)
+- **ALWAYS** use `get()` method to access dictionary values (PYL-R1715)
+- **CONSIDER** using dictionary comprehension (PYL-R1717)
+- **CONSIDER** using set comprehension (PYL-R1718)
+
+#### String and Text Issues
+- **NEVER** use old inequality operator (`<>`) (PYL-E1607)
+- **NEVER** use old octal literal (PYL-E1608)
+- **NEVER** use non-ASCII bytes literals (PYL-E1610)
+- **NEVER** use `basestring` built-in (PYL-W1602)
+- **NEVER** use deprecated `string` function (PYL-W1649)
+- **NEVER** use `unicode` built-in (PYL-W1612)
+- **NEVER** use `cmp` built-in (PYL-W1604)
+- **NEVER** use `apply` built-in (PYL-W1601)
+- **NEVER** use `reload` built-in (PYL-W1626)
+- **NEVER** use `execfile` built-in (PYL-W1606)
+- **NEVER** use `tempnam` built-in (PYL-W1601)
+- **CONSIDER** using f-strings (PYL-C0209)
+- **CONSIDER** using `join()` for string concatenation (PYL-R1713)
+
+#### File and I/O Issues
+- **ALWAYS** use `with` statement for file operations (PTC-W0010)
+- **NEVER** open files without `with` statement (PTC-W0010)
+- **NEVER** perform I/O on closed files (PTC-W0021)
+- **NEVER** use insecure file permissions (BAN-B103)
+- **NEVER** use illegal operations on files (PTC-W0022)
+
+#### Context Manager Issues
+- **NEVER** use object that is not context manager with `with` (PYL-E1129)
+- **NEVER** use not-async-context-manager incorrectly (PYL-E1701)
+- **NEVER** use `as` with another context manager that looks like tuple (PYL-W0124)
+
+#### Generator and Iterator Issues
+- **NEVER** convert `__init__` method to generator (FLK-F702)
+- **NEVER** use `yield` or `yield from` outside function (FLK-F704)
+- **NEVER** use `return` with arguments in generator (FLK-F705)
+- **NEVER** use `return` outside function (FLK-F706)
+
+#### Lambda and Comprehension Issues
+- **NEVER** use unnecessary lambda expression (PYL-W0108)
+- **NEVER** use unnecessary comprehension (PTC-W0016)
+- **NEVER** use redundant list comprehension (use generator) (PYL-R1728)
+
+#### Comparison and Logic Issues
+- **ALWAYS** test for membership with `not in` (FLK-E713)
+- **NEVER** use unneeded `not` (PYL-C0113)
+- **NEVER** use `len()` as condition (PYL-C1802)
+- **NEVER** have misplaced comparison constant (PYL-C2201)
+- **NEVER** have chained comparison (PYL-R1716)
+- **CONSIDER** merging `isinstance` calls (PYL-R1701)
+- **CONSIDER** using `in` for membership tests (PYL-R1714)
+
+#### Assignment Issues
+- **NEVER** assign variable to itself (PYL-W0127)
+- **NEVER** have ambiguous augmented assignment (`=+` / `=-`) (PTC-W0066)
+- **NEVER** have attribute defined outside `__init__` (PYL-W0201)
+- **NEVER** have invalid star assignment target (PYL-E0113)
+- **NEVER** have too many expressions in star-unpacking assignment (FLK-F621)
+
+#### Threading and Concurrency
+- **NEVER** create thread with no target function (PYL-W1506)
+- **ALWAYS** handle thread lifecycle properly
+
+#### Deprecated and Removed Features
+- **NEVER** use removed `sys` module attributes (PYL-W1660)
+- **NEVER** use removed `operator` module attributes (PYL-W1657)
+- **NEVER** use deprecated functions (PYL-W1505)
+- **NEVER** use method that has been deprecated (PYL-W1505)
+
+### Code Style Issues (FLK-*)
+
+#### Indentation and Formatting
+- **ALWAYS** use 4 spaces for indentation (FLK-E114)
+- **NEVER** mix tabs and spaces (FLK-W191, FLK-E191)
+- **NEVER** have trailing whitespace (FLK-W291)
+- **NEVER** have continuation line over-indented (FLK-E126)
+- **NEVER** have continuation line under-indented (FLK-E121, FLK-E122, FLK-E223)
+- **NEVER** have continuation line missing indentation (FLK-E122)
+- **NEVER** have continuation line unaligned for hanging indent (FLK-E131)
+- **NEVER** have continuation line with same indent as next logical line (FLK-E125)
+- **NEVER** have continuation line over-indented for visual indent (FLK-E127)
+- **NEVER** have continuation line under-indented for visual indent (FLK-E128)
+- **NEVER** have bad indentation (PYL-W0311)
+- **NEVER** have visually indented line with same indent as next logical line (FLK-E129)
+- **NEVER** have indentation that is not multiple of four in comments (FLK-E114)
+- **NEVER** have unexpected indentation in comments (FLK-E116)
+- **NEVER** have tab after comma (FLK-E242)
+- **NEVER** have tab after operator (FLK-E224)
+- **NEVER** have tab before operator (FLK-E115)
+- **NEVER** have tab after keyword (FLK-E273)
+- **NEVER** have tab before keyword (FLK-E274)
+- **NEVER** have indentation contains tabs (FLK-W191)
+- **NEVER** have docstring indented with tabs (FLK-D206)
+
+#### Whitespace
+- **ALWAYS** have whitespace around operators (FLK-E225, FLK-E226, FLK-E228)
+- **ALWAYS** have whitespace around arithmetic operator (FLK-E226)
+- **ALWAYS** have whitespace around modulo operator (FLK-E228)
+- **ALWAYS** have whitespace around bitwise or shift operator (FLK-E227)
+- **NEVER** have missing whitespace around operator (FLK-E225)
+- **NEVER** have missing whitespace after keyword (FLK-E275)
+- **NEVER** have missing whitespace after `,`, `;`, or `:` (FLK-E231)
+- **NEVER** have multiple spaces after operator (FLK-E222)
+- **NEVER** have multiple spaces before keyword (FLK-E272)
+- **NEVER** have multiple spaces found before operator (FLK-E221)
+- **NEVER** have multiple spaces after `,` (FLK-E241)
+- **NEVER** have multiple spaces after keyword (FLK-E251)
+- **NEVER** have whitespace before closing parenthesis (FLK-E202)
+- **NEVER** have whitespace after opening parenthesis (FLK-E201)
+- **NEVER** have whitespace before opening parenthesis (FLK-E703)
+- **NEVER** have unexpected spaces around keyword/parameter equals (FLK-E251)
+
+#### Line Length and Breaks
+- **KEEP** lines under 100 characters (FLK-E501) - configurable via `max_line_length`
+- **NEVER** have line too long (FLK-E501)
+- **NEVER** have multiple statements on one line (FLK-E702)
+- **NEVER** have statement ends with semicolon (FLK-E703)
+- **NEVER** have unnecessary semicolon (PYL-W0301)
+- **NEVER** have line break before binary operator (FLK-W503)
+- **NEVER** have unexpected line ending format (PYL-C0327)
+- **NEVER** have mixed line endings (FLK-E702)
+
+#### Blank Lines
+- **ALWAYS** have 2 blank lines before top-level function/class (FLK-E301)
+- **ALWAYS** have 1 blank line before nested definition (FLK-E306)
+- **ALWAYS** have 1 blank line after function/class (FLK-E305)
+- **ALWAYS** have 2 blank lines after end of function or class (FLK-E211)
+- **NEVER** have too many blank lines (FLK-E303)
+- **NEVER** have multiple blank lines at end of file (FLK-W391)
+- **NEVER** have blank lines found after function decorator (FLK-E304)
+- **NEVER** have blank lines before class docstring (FLK-D211)
+- **NEVER** have blank lines after class docstring (FLK-D204)
+- **NEVER** have blank lines before function docstring (FLK-D201)
+- **NEVER** have blank lines after function docstring (FLK-D202)
+
+#### Comments
+- **ALWAYS** start block comment with `# ` (FLK-E231)
+- **ALWAYS** start inline comment with `# ` (FLK-E262)
+- **NEVER** have too many leading `#` for block comment (FLK-E266)
+- **NEVER** have unexpected indentation in comments (FLK-E115)
+- **NEVER** have expected indented block in comments (FLK-E115)
+- **NEVER** have tab found in comments (FLK-E116)
+
+#### Docstrings
+- **ALWAYS** provide module docstrings (PY-D0001)
+- **ALWAYS** provide class docstrings (PY-D0002)
+- **ALWAYS** provide function docstrings (PY-D0003)
+- **NEVER** have docstring over-indented (FLK-D208)
+- **NEVER** have docstring under-indented (FLK-D207)
+- **NEVER** have doc line too long (FLK-W505)
+- **NEVER** have one-line docstring that doesn't fit on one line (FLK-D200)
+- **NEVER** have multi-line docstring closing quotes on same line (FLK-D209)
+- **NEVER** have whitespaces surrounding docstring text (FLK-D210)
+- **NEVER** have first line as function's signature (FLK-D402)
+- **ALWAYS** use `r"""` if any backslashes in docstring (FLK-D301)
+- **NEVER** use single quote in docstring (FLK-D300)
+- **NEVER** have unassigned string statement (PYL-W0105)
+
+#### Imports
+- **ALWAYS** group imports: stdlib, third-party, local (FLK-E401)
+- **NEVER** have multiple imports on one line (FLK-E401)
+- **NEVER** have module level import not at top (FLK-E402)
+
+#### Quotes and Strings
+- **BE CONSISTENT** with quote style (single vs double)
+- **NEVER** have unnecessary literal (PTC-W0018)
+
+#### Parentheses and Brackets
+- **NEVER** have closing bracket that doesn't match indentation (FLK-E123, FLK-E124)
+- **NEVER** have closing bracket that doesn't match visual indentation (FLK-E271)
+- **NEVER** have unnecessary parentheses after keyword (PYL-C0325)
+- **NEVER** have backslash redundant between brackets (FLK-E502)
+
+### Performance Issues (PYL-R*)
+
+#### Iteration and Loops
+- **CONSIDER** using `join()` for string concatenation (PYL-R1713)
+- **CONSIDER** using dictionary comprehension (PYL-R1717)
+- **CONSIDER** using set comprehension (PYL-R1718)
+- **CONSIDER** iterating dictionary directly (PYL-C0201)
+- **CONSIDER** using `in` for membership tests (PYL-R1714)
+- **NEVER** change set size during iteration (PTC-W0055)
+- **NEVER** use loop variable outside the loop (PYL-W0631)
+
+#### Comprehensions
+- **CONSIDER** using generator instead of list comprehension when appropriate (PYL-R1728)
+- **NEVER** use unnecessary comprehension (PTC-W0016)
+- **NEVER** use redundant list comprehension (PYL-R1728)
+
+#### Function Complexity
+- **KEEP** cyclomatic complexity under threshold (PY-R1000)
+- **REFACTOR** functions with high complexity
+
+### Type Checking Issues (TYP-*)
+
+#### Type Hints
+- **ALWAYS** provide type hints for function parameters (TYP-068)
+- **ALWAYS** provide type hints for return values (TYP-012)
+- **ALWAYS** provide type hints for callables (TYP-051)
+- **NEVER** use invalid type alias (TYP-048)
+- **NEVER** use invalid type for tuple index (TYP-054)
+- **NEVER** use unsupported type application (TYP-019)
+- **NEVER** have uninferred lambda expression type (TYP-012)
+- **NEVER** use type hint for with statement (unreliable) (TYP-036)
+- **NEVER** have missing type annotation (TYP-068)
+- **NEVER** suppress type checking issues unnecessarily (TYP-001)
+
+### Django-Specific Issues (PTC-*, PY-*)
+
+#### Model Issues
+- **NEVER** have model missing `__unicode__` method (PYL-W5101)
+- **NEVER** have field duplicates containing class name (PTC-W0052)
+- **NEVER** have redundant `default=None` for model field (PTC-W0907)
+- **NEVER** have `unique_for` constraint found (PTC-W0908)
+- **NEVER** have new column added with default value (PYL-W5198)
+
+#### HTTP and Response Issues
+- **NEVER** use `HttpResponse()` to return JSON (PYL-R5101)
+- **NEVER** have `HttpResponse()` returns `application/json` content type (PYL-R5102)
+- **NEVER** have redundant `content_type` parameter for `JsonResponse()` (PYL-R5103)
+- **NEVER** use insecure `format_html` (PY-S0901)
+
+#### Security Issues
+- **ALWAYS** audit sensitive cookies without `secure` attribute (PTC-W6003)
+- **ALWAYS** audit sensitive cookies without `httponly` attribute (PY-A6004)
+- **ALWAYS** audit external control of file name or path (PTC-W6004)
+- **NEVER** configure loggers insecurely (PY-A6006)
+- **NEVER** have Flask app with DEBUG mode enabled (PTC-W0029)
+
+### General Best Practices
+
+#### Code Organization
+- **NEVER** have unused variables
+- **NEVER** have unused imports
+- **ALWAYS** remove debugger statements (PTC-W0014, PTC-W0013)
+- **NEVER** use `FIXME`/`XXX`/`TODO` without context (PYL-W0511)
+- **NEVER** have subprocess run with ignored non-zero exit (PYL-W1510)
+
+#### Error Handling
+- **ALWAYS** handle exceptions properly
+- **NEVER** lose exceptions (PYL-W0150)
+- **NEVER** have exception might be lost (PTC-W0020)
+
+#### Logging
+- **ALWAYS** use lazy formatting for logging messages (PYL-W1201, PYL-W1202, PYL-W1203)
+- **NEVER** pass formatted string to logging module (PYL-W1203)
+- **NEVER** have logging that is not lazy (PYL-W1201)
+
+#### Testing
+- **NEVER** use `assert` outside of tests (BAN-B101)
+- **ALWAYS** write tests for new code
+
+### References
+- DeepSource Python Analyzer Directory: https://deepsource.com/directory/python
+

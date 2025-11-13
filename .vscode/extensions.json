@@ -1,0 +1,32 @@
+{
+  "recommendations": [
+    // Python Language Support
+    "ms-python.python",
+    "ms-python.vscode-pylance",
+
+    // Ruff - Linter and Formatter (as per coding-rules.mdc)
+    "charliermarsh.ruff",
+
+    // MyPy Type Checker (as per coding-rules.mdc)
+    "ms-python.mypy-type-checker",
+
+    // Bandit Security Scanner (as per coding-rules.mdc)
+    "ms-python.bandit",
+
+    // Testing
+    "ms-python.pytest",
+
+    // Git Integration (for commit message conventions)
+    "eamodio.gitlens",
+
+    // Code Quality
+    "ms-python.black-formatter",
+    "ms-python.isort",
+
+    // Documentation
+    "ms-python.docstring-generator",
+
+    // General Development
+    "ms-vscode.vscode-json"
+  ]
+}
