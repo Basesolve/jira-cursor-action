@@ -1,7 +1,7 @@
 # jira-cursor
 
 [![PyPI version](https://badge.fury.io/py/jira-cursor.svg)](https://badge.fury.io/py/jira-cursor)
-[![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
+[![Python 3.9+](https://img.shields.io/badge/python-3.9+-blue.svg)](https://www.python.org/downloads/)
 
 Automate PR creation from Jira tickets using Cursor Cloud Agents. This package monitors Jira tickets and automatically generates code changes and creates draft pull requests based on ticket requirements.
 
@@ -352,7 +352,7 @@ jira-cursor --log-level DEBUG
 
 ## Requirements
 
-- Python 3.8+
+- Python 3.9+
 - Jira API token with read/write permissions
 - Cursor Cloud API key (required)
 - Access to the Jira project and GitHub repository
