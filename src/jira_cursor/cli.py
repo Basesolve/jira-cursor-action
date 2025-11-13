@@ -56,13 +56,13 @@ def main() -> int:
     parser.add_argument(
         "--need-info-status",
         type=str,
-        default="Need More Information",
+        default=os.getenv("NEED_INFO_STATUS", "Need More Information"),
         help="Status name for tickets needing more information",
     )
     parser.add_argument(
         "--pr-created-status",
         type=str,
-        default="Draft PR created. Pending review",
+        default=os.getenv("PR_CREATED_STATUS", "Draft PR created. Pending review"),
         help="Status name for tickets after PR is created",
     )
     parser.add_argument(
