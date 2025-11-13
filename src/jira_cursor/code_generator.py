@@ -94,21 +94,30 @@ class CodeGenerator:
             labels=ticket_requirements.get("labels", []),
         )
 
-        # Read file contents for files mentioned in ticket
-        # Try to get from Jira attachments first, then fallback to local
-        # filesystem
-        file_contents = self._read_file_contents_from_jira(
-            ticket_key, file_references
-        ) or self._read_file_contents_from_filesystem(file_references)
+        # Separate files into Jira attachments (with contents) and repo files (names only)
+        # Jira attachments need full contents since they're not in the repo
+        # Repo files only need names since the agent has repo access
+        jira_file_contents = self._read_file_contents_from_jira(ticket_key, file_references) or {}
+
+        # Identify which files are in the repo (not Jira attachments)
+        # These will be sent as file references only, without contents
+        repo_file_references = [
+            file_ref for file_ref in file_references if file_ref not in jira_file_contents
+        ]
+
+        # Only include Jira attachment contents in file_contents
+        # Repo files are passed as file_references only (agent has repo access)
+        file_contents = jira_file_contents
 
         # Create branch name for target (same logic as PRCreator)
         branch_name = self._create_branch_name(ticket_key, summary)
 
         # Generate code using Cursor Cloud Agents
+        # Pass repo files as file_references only, Jira attachments as file_contents
         result = self.cursor_client.generate_code(
             prompt=prompt,
             context=codebase_context,
-            file_references=file_references,
+            file_references=repo_file_references,
             codebase_context=codebase_context,
             file_contents=file_contents,
             branch_name=branch_name,
@@ -161,8 +170,7 @@ class CodeGenerator:
         prompt_parts.append(
             "\n\nPlease generate the code changes needed to implement this "
             "ticket. Follow the project's coding standards and security best "
-            "practices. Return the code as a unified diff format that can be "
-            "applied to the codebase."
+            "practices."
         )
 
         return "\n".join(prompt_parts)

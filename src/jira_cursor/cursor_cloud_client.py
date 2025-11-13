@@ -217,11 +217,12 @@ class CursorCloudClient:
         :type prompt: str
         :param context: Additional context
         :type context: Optional[str]
-        :param file_references: File references
+        :param file_references: File references (repo files - names only, agent has repo access)
         :type file_references: Optional[list[str]]
         :param codebase_context: Codebase context
         :type codebase_context: Optional[str]
         :param file_contents: dictionary mapping file paths to their contents
+            (Jira attachments only - these aren't in the repo)
         :type file_contents: Optional[dict[str, str]]
         :param branch_name: Branch name for target (optional)
         :type branch_name: Optional[str]
@@ -241,22 +242,27 @@ class CursorCloudClient:
         if codebase_context:
             prompt_parts.append(f"\n\nCodebase Context: {codebase_context}")
 
-        # Add file references as text context
+        # Add file references as text context (repo files - names only)
+        # These are files in the repository that the agent can access directly
         if file_references:
             file_refs_text = "\n".join(file_references)
-            prompt_parts.append(f"\n\nFile References:\n{file_refs_text}")
+            prompt_parts.append(f"\n\nFile References (repo files):\n{file_refs_text}")
             logger.info(
-                "Including %d file reference(s) in prompt text",
+                "Including %d repo file reference(s) (names only) in prompt text",
                 len(file_references),
             )
 
-        # Add file contents as text context
+        # Add file contents as text context (Jira attachments only)
+        # These are files from Jira attachments that aren't in the repo
         if file_contents:
-            file_contents_text = "\n\nFile Contents:\n"
+            file_contents_text = "\n\nFile Contents (Jira attachments):\n"
             for file_path, content in file_contents.items():
                 file_contents_text += f"\n--- {file_path} ---\n{content}\n"
             prompt_parts.append(file_contents_text)
-            logger.info(f"Including {len(file_contents)} file(s) content in prompt text")
+            logger.info(
+                "Including %d Jira attachment file(s) (with full contents) in prompt text",
+                len(file_contents),
+            )
 
         full_prompt_text = "\n".join(prompt_parts)
 
@@ -309,7 +315,7 @@ class CursorCloudClient:
         file_ref_count = len(file_references) if file_references else 0
         file_content_count = len(file_contents) if file_contents else 0
         logger.info(
-            "  File references in prompt: %d, File contents in prompt: %d",
+            "  Repo file references (names only): %d, Jira attachment files (with contents): %d",
             file_ref_count,
             file_content_count,
         )
