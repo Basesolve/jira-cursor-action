@@ -102,6 +102,18 @@ def main() -> int:
         help="Repository ref/branch for agent source (default: main)",
     )
     parser.add_argument(
+        "--cursor-cloud-timeout",
+        type=int,
+        default=1800,
+        help="Timeout in seconds for agent completion (default: 1800 / 30 minutes)",
+    )
+    parser.add_argument(
+        "--cursor-cloud-model",
+        type=str,
+        default=None,
+        help="Model to use for agent (optional, will be validated against supported models)",
+    )
+    parser.add_argument(
         "--jql-query",
         type=str,
         help="JQL query to select tickets for processing",
@@ -153,6 +165,12 @@ def main() -> int:
                 "CURSOR_CLOUD_REPOSITORY_REF", "main"
             )
 
+            # Get timeout and model from args or environment
+            timeout = args.cursor_cloud_timeout or int(
+                os.getenv("CURSOR_CLOUD_TIMEOUT", "1800")
+            )
+            model = args.cursor_cloud_model or os.getenv("CURSOR_CLOUD_MODEL", None)
+
             code_generator = CodeGenerator(
                 api_key=cursor_api_key,
                 jira_client=jira_client_for_codegen,
@@ -161,6 +179,8 @@ def main() -> int:
                 codebase_path=os.getenv("CODEBASE_PATH", None),
                 repository_url=repository_url,
                 repository_ref=repository_ref,
+                timeout=timeout,
+                model=model,
             )
             logger.info(
                 "Code generator initialized with Cursor Cloud Agents (repository: %s, ref: %s)",

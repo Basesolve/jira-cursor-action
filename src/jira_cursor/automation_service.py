@@ -344,6 +344,8 @@ def create_automation_service(  # pylint: disable=too-many-arguments,too-many-po
             # Construct repository URL from GitHub repo info
             repository_url = f"https://github.com/{github_repo_owner}/{github_repo_name}"
             repository_ref = os.getenv("CURSOR_CLOUD_REPOSITORY_REF", "main")
+            timeout = int(os.getenv("CURSOR_CLOUD_TIMEOUT", "1800"))
+            model = os.getenv("CURSOR_CLOUD_MODEL", None)
 
             code_generator = CodeGenerator(
                 api_key=cursor_api_key,
@@ -352,6 +354,8 @@ def create_automation_service(  # pylint: disable=too-many-arguments,too-many-po
                 codebase_path=os.getenv("CODEBASE_PATH", None),
                 repository_url=repository_url,
                 repository_ref=repository_ref,
+                timeout=timeout,
+                model=model,
             )
             logger.info(
                 "Code generator initialized with Cursor Cloud Agents (repository: %s, ref: %s)",

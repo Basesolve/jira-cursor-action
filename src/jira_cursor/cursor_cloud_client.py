@@ -24,6 +24,8 @@ class CursorCloudClient:
         base_url: str = "https://api.cursor.com",
         repository_url: Optional[str] = None,
         repository_ref: Optional[str] = None,
+        timeout: int = 1800,
+        model: Optional[str] = None,
     ):
         """Initialize Cursor Cloud Agents client.
 
@@ -35,16 +37,26 @@ class CursorCloudClient:
         :type repository_url: Optional[str]
         :param repository_ref: Optional repository ref (branch/commit)
         :type repository_ref: Optional[str]
+        :param timeout: Timeout in seconds for agent completion (default: 1800)
+        :type timeout: int
+        :param model: Optional model to use for agent (will be validated)
+        :type model: Optional[str]
         """
         self.api_key = api_key
         self.base_url = base_url.rstrip("/")
         self.repository_url = repository_url
         self.repository_ref = repository_ref or "main"
+        self.timeout = timeout
+        self.model = model
         self.headers = {
             "Authorization": f"Bearer {api_key}",
             "Content-Type": "application/json",
         }
-        logger.info("Initialized CursorCloudClient with base URL: %s", self.base_url)
+        logger.info(
+            "Initialized CursorCloudClient with base URL: %s, timeout: %ds",
+            self.base_url,
+            self.timeout,
+        )
 
     def generate_code(
         self,
@@ -100,7 +112,10 @@ class CursorCloudClient:
 
             # Step 2: Get agent status/result (poll until complete)
             result = self._wait_for_agent_completion(
-                agent_id, branch_name=branch_name, auto_create_pr=auto_create_pr
+                agent_id,
+                max_wait_time=self.timeout,
+                branch_name=branch_name,
+                auto_create_pr=auto_create_pr,
             )
 
             if result:
@@ -196,6 +211,31 @@ class CursorCloudClient:
             return response
 
         logger.warning("Failed to get status for agent %s", agent_id)
+        return None
+
+    def get_supported_models(self) -> Optional[list[str]]:
+        """Get list of supported models from Cursor Cloud API.
+
+        :return: List of supported model names or None if failed
+        :rtype: Optional[list[str]]
+        """
+        logger.debug("Fetching supported models from Cursor Cloud API")
+
+        response = self._call_api_with_retry(
+            method="GET",
+            endpoint="v0/models",
+            payload=None,
+        )
+
+        if response and isinstance(response, dict) and "models" in response:
+            models = response.get("models", [])
+            if isinstance(models, list):
+                logger.info("Fetched %d supported model(s) from API", len(models))
+                return models
+            logger.warning("Invalid models format in API response")
+            return None
+
+        logger.warning("Failed to fetch supported models from API")
         return None
 
     def _build_agent_creation_payload(
@@ -301,8 +341,32 @@ class CursorCloudClient:
             payload["target"] = {
                 "autoCreatePr": auto_create_pr,
                 "branchName": branch_name,
+                "openAsCursorGithubApp": True,
             }
-            logger.info(f"Target configured: branch={branch_name}, autoCreatePr={auto_create_pr}")
+            logger.info(
+                f"Target configured: branch={branch_name}, autoCreatePr={auto_create_pr}, "
+                f"openAsCursorGithubApp=True"
+            )
+
+        # Validate and add model if provided
+        if self.model:
+            supported_models = self.get_supported_models()
+            if supported_models and self.model in supported_models:
+                payload["model"] = self.model
+                logger.info("Model validated and included in payload: %s", self.model)
+            else:
+                if supported_models is None:
+                    logger.warning(
+                        "Failed to fetch supported models. Model '%s' will be ignored.",
+                        self.model,
+                    )
+                else:
+                    logger.warning(
+                        "Model '%s' is not in the list of supported models. "
+                        "Supported models: %s. Model will be ignored.",
+                        self.model,
+                        ", ".join(supported_models),
+                    )
 
         # Log the payload for debugging (excluding sensitive data)
         logger.info("Agent creation payload:")

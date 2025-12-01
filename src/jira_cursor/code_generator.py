@@ -27,6 +27,8 @@ class CodeGenerator:
         codebase_path: Optional[str] = None,
         repository_url: Optional[str] = None,
         repository_ref: Optional[str] = None,
+        timeout: int = 1800,
+        model: Optional[str] = None,
     ):
         """Initialize code generator with Cursor Cloud Agents.
 
@@ -45,12 +47,18 @@ class CodeGenerator:
         :type repository_url: Optional[str]
         :param repository_ref: Repository ref/branch (default: main)
         :type repository_ref: Optional[str]
+        :param timeout: Timeout in seconds for agent completion (default: 1800)
+        :type timeout: int
+        :param model: Optional model to use for agent (will be validated)
+        :type model: Optional[str]
         """
         self.cursor_client = CursorCloudClient(
             api_key=api_key,
             base_url=base_url or "https://api.cursor.com",
             repository_url=repository_url,
             repository_ref=repository_ref,
+            timeout=timeout,
+            model=model,
         )
         self.jira_client = jira_client
         self.codebase_path = Path(codebase_path) if codebase_path else Path.cwd()
@@ -171,6 +179,16 @@ class CodeGenerator:
             "\n\nPlease generate the code changes needed to implement this "
             "ticket. Follow the project's coding standards and security best "
             "practices."
+        )
+
+        # Add explicit instructions about commit messages and PR naming
+        prompt_parts.append(
+            "\n\nIMPORTANT - Commit Messages and PR Naming Requirements:\n"
+            f"- ALL commit messages MUST start with the ticket ID '{ticket_key}' "
+            f"followed by a colon and space (e.g., '{ticket_key}: Add new feature')\n"
+            f"- The PR title/name MUST include the ticket ID '{ticket_key}' at the "
+            f"beginning (e.g., '{ticket_key}: Implement feature from ticket')\n"
+            f"- This is REQUIRED for all commits and the PR - do not omit the ticket ID"
         )
 
         return "\n".join(prompt_parts)
